@@ -25,7 +25,6 @@ import com.kymjs.rxvolley.rx.RxBus;
 import com.kymjs.rxvolley.toolbox.Loger;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.Logger;
 
 /**
  * 缓存调度器
@@ -80,7 +79,7 @@ public class CacheDispatcher extends Thread {
         mCache.initialize();
 
         while (true) {
-            Loger.d("CacheDispatcher：run");
+            Loger.debug("CacheDispatcher：run");
             try {
                 final Request<?> request = mCacheQueue.take();
                 if (request.isCanceled()) {
@@ -106,7 +105,7 @@ public class CacheDispatcher extends Thread {
                         entry.responseHeaders));
                 mPoster.post(new Result(request.getUrl(), entry.responseHeaders, entry.data));
 
-                Loger.d("CacheDispatcher：http resopnd from cache["+request.getUrl()+"]");
+                Loger.debug("CacheDispatcher：http resopnd from cache["+request.getUrl()+"]");
                 sleep(request.getConfig().mDelayTime);
                 if (request.getCallback() != null) {
                     request.getCallback().onSuccessInAsync(entry.data);
@@ -114,7 +113,7 @@ public class CacheDispatcher extends Thread {
 
                 mDelivery.postResponse(request, response);
             } catch (InterruptedException e) {
-                Loger.d("CacheDispatcher：InterruptedException");
+                Loger.debug("CacheDispatcher：InterruptedException");
                 e.printStackTrace();
                 if (mQuit) {
                     return;

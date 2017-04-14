@@ -25,7 +25,7 @@ public abstract class RequestHttpCallback<T> extends HttpCallback implements Pro
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onSuccess(String jsonStr) {
-		Loger.debug("response:" + jsonStr);
+		Loger.d("Response:" + jsonStr);
 		if (mIsCheckResJsonStr) {
 			if (!TextUtils.isEmpty(jsonStr)) {
 				try {

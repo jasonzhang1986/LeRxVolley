@@ -160,7 +160,7 @@ public class NetManager<T> {
 				jsonString = URLEncoder.encode(jsonString);
 			}
 			httpParams.putJsonParams(jsonString);
-			Loger.debug("Response:" + jsonString);
+			Loger.d("Response:" + jsonString);
 		}
 		return httpParams;
 	}

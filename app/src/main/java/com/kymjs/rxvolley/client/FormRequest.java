@@ -84,7 +84,7 @@ public class FormRequest extends Request<byte[]> {
                 mParams.writeTo(bos);
             }
         } catch (IOException e) {
-            Loger.debug("FormRequest#getBody()--->IOException writing to ByteArrayOutputStream");
+            Loger.d("FormRequest#getBody()--->IOException writing to ByteArrayOutputStream");
         }
         return bos.toByteArray();
     }
@@ -98,7 +98,7 @@ public class FormRequest extends Request<byte[]> {
 
     @Override
     protected void deliverResponse(ArrayList<HttpParamsEntry> headers, final byte[] response) {
-        Loger.d("FormRequest deliverResponse " + getConfig().mUrl);
+        Loger.debug("FormRequest deliverResponse " + getConfig().mUrl);
         if (mCallback != null) {
             HashMap<String, String> map = new HashMap<String, String>(headers.size());
             for (HttpParamsEntry entry : headers) {

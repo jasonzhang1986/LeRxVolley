@@ -17,8 +17,6 @@
 package com.kymjs.rxvolley.client;
 
 
-import android.util.Log;
-
 import com.kymjs.rxvolley.RxVolley;
 import com.kymjs.rxvolley.http.HttpHeaderParser;
 import com.kymjs.rxvolley.http.NetworkResponse;
@@ -52,7 +50,7 @@ public class JsonRequest extends Request<byte[]> {
 
     @Override
     protected void deliverResponse(ArrayList<HttpParamsEntry> headers, byte[] response) {
-        Loger.d("JsonRequest deliverResponse");
+        Loger.debug("JsonRequest deliverResponse");
         if (mCallback != null) {
             HashMap<String, String> map = new HashMap<String, String>(headers.size());
             for (HttpParamsEntry entry : headers) {
@@ -88,7 +86,7 @@ public class JsonRequest extends Request<byte[]> {
         try {
             return mRequestBody == null ? null : mRequestBody.getBytes(getConfig().mEncoding);
         } catch (UnsupportedEncodingException uee) {
-            Loger.debug(String.format("Unsupported Encoding while trying to get the bytes of %s" +
+            Loger.d(String.format("Unsupported Encoding while trying to get the bytes of %s" +
                     " using %s", mRequestBody, getConfig().mEncoding));
             return null;
         }

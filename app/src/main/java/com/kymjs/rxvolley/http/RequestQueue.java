@@ -19,7 +19,6 @@ package com.kymjs.rxvolley.http;
 import android.os.Handler;
 import android.os.Looper;
 
-import android.util.Log;
 import com.kymjs.rxvolley.interf.ICache;
 import com.kymjs.rxvolley.interf.IDelivery;
 import com.kymjs.rxvolley.interf.IHttpStack;
@@ -261,7 +260,7 @@ public class RequestQueue {
 
         // If the request is uncacheable, skip the cache queue and go straight to the network.
         if (!request.shouldCache()) {
-            Loger.d("RequestQueue add " + request.getUrl());
+            Loger.debug("RequestQueue add " + request.getUrl());
             mNetworkQueue.add(request);
             return request;
         }
@@ -277,7 +276,7 @@ public class RequestQueue {
                 }
                 stagedRequests.add(request);
                 mWaitingRequests.put(cacheKey, stagedRequests);
-                Loger.d(String.format("Request for cacheKey=%s is in flight, putting on hold" +
+                Loger.debug(String.format("Request for cacheKey=%s is in flight, putting on hold" +
                         ".", cacheKey));
             } else {
                 // Insert 'null' queue for this cacheKey, indicating there is now a request in
@@ -307,7 +306,7 @@ public class RequestQueue {
                 String cacheKey = request.getCacheKey();
                 Queue<Request<?>> waitingRequests = mWaitingRequests.remove(cacheKey);
                 if (waitingRequests != null) {
-                    Loger.d(String.format("Releasing %d waiting requests for cacheKey=%s.",
+                    Loger.debug(String.format("Releasing %debug waiting requests for cacheKey=%s.",
                             waitingRequests.size(), cacheKey));
                     // Process all queued up requests. They won't be considered as in flight, but
                     // that's not a problem as the cache has been primed by 'request'.

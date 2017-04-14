@@ -110,7 +110,7 @@ public class DiskBasedCache implements ICache {
         }
         mEntries.clear();
         mTotalSize = 0;
-        Loger.d("Cache cleared.");
+        Loger.debug("Cache cleared.");
     }
 
     /**
@@ -132,7 +132,7 @@ public class DiskBasedCache implements ICache {
             byte[] data = streamToBytes(cis, (int) (file.length() - cis.bytesRead));
             return entry.toCacheEntry(data);
         } catch (IOException e) {
-            Loger.debug(String.format("%s: %s", file.getAbsolutePath(), e.toString()));
+            Loger.d(String.format("%s: %s", file.getAbsolutePath(), e.toString()));
             remove(key);
         } finally {
             FileUtils.closeIO(cis);
@@ -148,7 +148,7 @@ public class DiskBasedCache implements ICache {
     public synchronized void initialize() {
         if (!mRootDirectory.exists()) {
             if (!mRootDirectory.mkdirs()) {
-                Loger.debug(String.format("Unable to create cache dir %s", mRootDirectory
+                Loger.d(String.format("Unable to create cache dir %s", mRootDirectory
                         .getAbsolutePath()));
             }
             return;
@@ -204,7 +204,7 @@ public class DiskBasedCache implements ICache {
             boolean success = e.writeHeader(fos);
             if (!success) {
                 fos.close();
-                Loger.debug(String.format("Failed to write header for %s", file.getAbsolutePath()));
+                Loger.d(String.format("Failed to write header for %s", file.getAbsolutePath()));
                 throw new IOException();
             }
             fos.write(entry.data);
@@ -212,11 +212,11 @@ public class DiskBasedCache implements ICache {
             putEntry(key, e);
             return;
         } catch (IOException e) {
-            Loger.debug(DiskBasedCache.class.getName() + e.getMessage());
+            Loger.d(DiskBasedCache.class.getName() + e.getMessage());
         }
         boolean deleted = file.delete();
         if (!deleted) {
-            Loger.debug(String.format("Could not clean up file %s", file.getAbsolutePath()));
+            Loger.d(String.format("Could not clean up file %s", file.getAbsolutePath()));
         }
     }
 
@@ -228,7 +228,7 @@ public class DiskBasedCache implements ICache {
         boolean deleted = getFileForKey(key).delete();
         removeEntry(key);
         if (!deleted) {
-            Loger.debug(String.format("Could not delete cache entry for key=%s, filename=%s",
+            Loger.d(String.format("Could not delete cache entry for key=%s, filename=%s",
                     key, getFilenameForKey(key)));
         }
     }
@@ -262,7 +262,7 @@ public class DiskBasedCache implements ICache {
         if ((mTotalSize + neededSpace) < mMaxCacheSizeInBytes) {
             return;
         }
-        Loger.d("Pruning old cache entries.");
+        Loger.debug("Pruning old cache entries.");
 
         long before = mTotalSize;
         int prunedFiles = 0;
@@ -276,7 +276,7 @@ public class DiskBasedCache implements ICache {
             if (deleted) {
                 mTotalSize -= e.size;
             } else {
-                Loger.d(String.format("Could not delete cache entry for key=%s, filename=%s",
+                Loger.debug(String.format("Could not delete cache entry for key=%s, filename=%s",
                         e.key, getFilenameForKey(e.key)));
             }
             iterator.remove();
@@ -287,7 +287,7 @@ public class DiskBasedCache implements ICache {
             }
         }
 
-        Loger.d(String.format("pruned %d files, %d bytes, %d ms",
+        Loger.debug(String.format("pruned %debug files, %debug bytes, %debug ms",
                 prunedFiles, (mTotalSize - before), SystemClock.elapsedRealtime() - startTime));
     }
 
@@ -440,7 +440,7 @@ public class DiskBasedCache implements ICache {
                 os.flush();
                 return true;
             } catch (IOException e) {
-                Loger.debug(String.format("%s", e.toString()));
+                Loger.d(String.format("%s", e.toString()));
                 return false;
             }
         }

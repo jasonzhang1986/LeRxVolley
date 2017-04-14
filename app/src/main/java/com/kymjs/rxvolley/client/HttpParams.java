@@ -17,7 +17,6 @@
 package com.kymjs.rxvolley.client;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.kymjs.rxvolley.toolbox.FileUtils;
 import com.kymjs.rxvolley.toolbox.HttpParamsEntry;
@@ -133,7 +132,7 @@ public class HttpParams {
                     FileUtils.input2byte(new FileInputStream(file)),
                     TYPE_OCTET_STREAM, BINARY_ENCODING, file.getName());
         } catch (FileNotFoundException e) {
-            Loger.debug("HttpParams.put()-> file not found");
+            Loger.d("HttpParams.put()-> file not found");
         }
     }
 

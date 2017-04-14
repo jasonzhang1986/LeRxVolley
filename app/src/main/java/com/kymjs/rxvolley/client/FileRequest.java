@@ -133,7 +133,7 @@ public class FileRequest extends Request<byte[]> {
     public byte[] handleResponse(URLHttpResponse response) throws IOException {
         long fileSize = response.getContentLength();
         if (fileSize <= 0) {
-            Loger.debug("Response doesn't present Content-Length!");
+            Loger.d("Response doesn't present Content-Length!");
         }
 
         long downloadedSize = mTemporaryFile.length();
@@ -198,7 +198,7 @@ public class FileRequest extends Request<byte[]> {
             try {
                 response.getContentStream().close();
             } catch (Exception e) {
-                Loger.debug("Error occured when calling consumingContent");
+                Loger.d("Error occured when calling consumingContent");
             }
             tmpFileRaf.close();
         }

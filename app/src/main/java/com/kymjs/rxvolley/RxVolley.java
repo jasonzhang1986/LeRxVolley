@@ -231,6 +231,7 @@ public class RxVolley {
          * 网络请求接口url
          */
         public Builder url(String url) {
+            Loger.d("request url = " + url);
             this.httpConfig.mUrl = url;
             return this;
         }

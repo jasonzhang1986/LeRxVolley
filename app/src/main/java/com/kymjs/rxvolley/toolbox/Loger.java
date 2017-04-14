@@ -25,17 +25,23 @@ import com.kymjs.rxvolley.BuildConfig;
  * @author kymjs (http://www.kymjs.com/) on 12/17/15.
  */
 public class Loger {
-    private static boolean sEnable = true;
+    private static boolean sEnable = false;
+    private static boolean sDebug = false;
     private static final String VERSION = "["+ BuildConfig.VERSION_NAME+"]";
     public static void setEnable(boolean enable) {
         sEnable = enable;
     }
-
-    public static void debug(String msg) {
-        Log.i("RxVolley"+VERSION, "" + msg);
+    public static void setDebug(boolean debug) {
+        sDebug = debug;
     }
+
     public static void d(String msg) {
-        if (sEnable) {
+        if (sEnable||sDebug) {
+            Log.i("RxVolley" + VERSION, "" + msg);
+        }
+    }
+    public static void debug(String msg) {
+        if (sDebug) {
             Log.i("RxVolley"+VERSION, "" + msg);
         }
     }

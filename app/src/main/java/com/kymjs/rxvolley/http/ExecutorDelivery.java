@@ -125,7 +125,7 @@ public class ExecutorDelivery implements IDelivery {
                 mRequest.finish("canceled-at-delivery");
                 return;
             }
-            Loger.d("ExecutorDelivery run " + mRequest.getUrl());
+            Loger.debug("ExecutorDelivery run " + mRequest.getUrl());
             // Deliver a normal response or error, depending.
             if (mResponse.isSuccess()) {
                 ArrayList<HttpParamsEntry> headers = new ArrayList<HttpParamsEntry>();

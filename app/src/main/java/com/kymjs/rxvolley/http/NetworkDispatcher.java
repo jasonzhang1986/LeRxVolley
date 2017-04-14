@@ -21,7 +21,6 @@ import android.net.TrafficStats;
 import android.os.Build;
 import android.os.Process;
 
-import android.util.Log;
 import com.kymjs.rxvolley.interf.ICache;
 import com.kymjs.rxvolley.interf.IDelivery;
 import com.kymjs.rxvolley.interf.INetwork;
@@ -74,12 +73,12 @@ public class NetworkDispatcher extends Thread {
      */
     @Override
     public void run() {
-        Loger.d("NetworkDispatcher run >>>>> ");
+        Loger.debug("NetworkDispatcher run >>>>> ");
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         while (true) {
             Request<?> request;
             try {
-                Loger.d("NetworkDispatcher run before take");
+                Loger.debug("NetworkDispatcher run before take");
                 request = mQueue.take();
             } catch (InterruptedException e) {
                 if (mQuit) {
@@ -88,7 +87,7 @@ public class NetworkDispatcher extends Thread {
                     continue;
                 }
             }
-            Loger.d("NetworkDispatcher run >> " +request.getUrl());
+            Loger.debug("NetworkDispatcher run >> " +request.getUrl());
             try {
                 if (request.isCanceled()) {
                     request.finish("任务已经取消");
@@ -102,9 +101,9 @@ public class NetworkDispatcher extends Thread {
                     request.finish("已经分发过本响应");
                     continue;
                 }
-                Loger.d("NetworkDispatcher run parseNetworkResponse >> " +request.getUrl());
+                Loger.debug("NetworkDispatcher run parseNetworkResponse >> " +request.getUrl());
                 Response<?> response = request.parseNetworkResponse(networkResponse);
-                Loger.d("NetworkDispatcher run parseNetworkResponse << " +request.getUrl());
+                Loger.debug("NetworkDispatcher run parseNetworkResponse << " +request.getUrl());
                 if (request.shouldCache() && response.cacheEntry != null) {
                     mCache.put(request.getCacheKey(), response.cacheEntry);
                 }
@@ -118,11 +117,11 @@ public class NetworkDispatcher extends Thread {
                             networkResponse.headers, networkResponse.data));
                 }
                 mDelivery.postResponse(request, response);
-                Loger.d("NetworkDispatcher run postResponse " +request.getUrl());
+                Loger.debug("NetworkDispatcher run postResponse " +request.getUrl());
             } catch (VolleyError volleyError) {
                 parseAndDeliverNetworkError(request, volleyError);
             } catch (Exception e) {
-                Loger.debug(String.format("Unhandled exception %s", e.getMessage()));
+                Loger.d(String.format("Unhandled exception %s", e.getMessage()));
                 mDelivery.postError(request, new VolleyError(e));
             }
         }

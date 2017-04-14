@@ -108,7 +108,7 @@ public class Network implements INetwork {
                 } else {
                     throw new VolleyError("NoConnection error", e);
                 }
-                Loger.debug(String.format("Unexpected response code %d for %s", statusCode,
+                Loger.d(String.format("Unexpected response code %debug for %s", statusCode,
                         request.getUrl()));
                 if (responseContents != null) {
                     networkResponse = new NetworkResponse(statusCode, responseContents,
@@ -120,7 +120,7 @@ public class Network implements INetwork {
                         throw new VolleyError(networkResponse);
                     }
                 } else {
-                    throw new VolleyError(String.format("Unexpected response code %d for %s",
+                    throw new VolleyError(String.format("Unexpected response code %debug for %s",
                             statusCode, request.getUrl()));
                 }
             }
@@ -143,13 +143,13 @@ public class Network implements INetwork {
             if (retryPolicy != null) {
                 retryPolicy.retry(exception);
             } else {
-                Loger.debug("not retry policy");
+                Loger.d("not retry policy");
             }
         } catch (VolleyError e) {
-            Loger.debug(String.format("%s-timeout-giveup [timeout=%s]", logPrefix, oldTimeout));
+            Loger.d(String.format("%s-timeout-giveup [timeout=%s]", logPrefix, oldTimeout));
             throw e;
         }
-        Loger.debug(String.format("%s-retry [timeout=%s]", logPrefix, oldTimeout));
+        Loger.d(String.format("%s-retry [timeout=%s]", logPrefix, oldTimeout));
     }
 
     /**
