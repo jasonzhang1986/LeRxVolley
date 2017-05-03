@@ -26,6 +26,9 @@ public class NetManager<T> {
 	private static volatile NetManager mNetManager;
 	private final static int TIME_OUT = 10 * 1000;
 	private boolean mUseStetho = false;
+	private boolean mUseOkHttpStack = false;
+	private NetManager() {
+	}
 	private NetManager(Context context) {
 		setDataCache(context,null);
 	}
@@ -33,9 +36,9 @@ public class NetManager<T> {
 	public void setDataCache(Context context,String cache) {
 		RequestQueue requestQueue = null;
 		if (TextUtils.isEmpty(cache)) {
-			requestQueue = RxVolley.getRequestQueue(context);
+			requestQueue = RxVolley.getRequestQueue(context, mUseOkHttpStack);
 		} else {
-			requestQueue = RequestQueue.newRequestQueue(new File(cache));
+			requestQueue = RequestQueue.newRequestQueue(new File(cache), mUseOkHttpStack);
 		}
 		RxVolley.setRequestQueue(requestQueue);
 	}
@@ -53,15 +56,28 @@ public class NetManager<T> {
 	}
 
 	private boolean stethoInited = false;
-	public void initStetho(Context applicationContext) {
-		mUseStetho = true;
+	public static void initHttp(Context applicationContext, boolean stetho, boolean okHttpStack) {
+		if (mNetManager == null) {
+			synchronized (NetManager.class) {
+				if (mNetManager==null) {
+					mNetManager = new NetManager();
+				}
+			}
+		}
+		mNetManager.mUseStetho = stetho;
+		mNetManager.mUseOkHttpStack = okHttpStack;
+		mNetManager.setDataCache(applicationContext,null);
+		if (mNetManager.mUseOkHttpStack) {
+			return;
+		}
 		synchronized (NetManager.class) {
-			if (!stethoInited) {
-				stethoInited = true;
+			if (!mNetManager.stethoInited) {
+				mNetManager.stethoInited = true;
 				Stetho.initializeWithDefaults(applicationContext);
 			}
 		}
 	}
+
 
 	public void doGet(Context context,String url, Map<String, String> headParams, RequestHttpCallback<T> callback, boolean shouldCache) {
 		getDefaultBuilder().url(url).httpMethod(RxVolley.Method.GET).shouldCache(shouldCache).params(getParams(headParams,true))
@@ -114,11 +130,11 @@ public class NetManager<T> {
 	}
 
 	public void doRequest(Context context,ObjectRequest<T> request) {
-		new RxVolley.Builder().stetho(mUseStetho).setRequest(request).doTask(context);
+		new RxVolley.Builder().stetho(mUseStetho).httpStack(true).setRequest(request).doTask(context);
 	}
 
 	private RxVolley.Builder getDefaultBuilder() {
-		return new RxVolley.Builder().timeout(TIME_OUT).stetho(mUseStetho).encoding("utf-8");
+		return new RxVolley.Builder().timeout(TIME_OUT).httpStack(true).stetho(mUseStetho).encoding("utf-8");
 	}
 
 	private HttpParams getParams(HttpParams httpParams, Map<String, String> parms,boolean isHead) {

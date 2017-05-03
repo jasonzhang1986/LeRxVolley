@@ -61,7 +61,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         mConfig = config;
         mCallback = callback;
         mDefaultTrafficStatsTag = findDefaultTrafficStatsTag(config.mUrl);
-        if (mConfig.mUseStetho) {
+        if (mConfig.mUseStetho && !mConfig.mUseOkHttpStack) {
             mStethoURLConnectionManager = new StethoURLConnectionManager(config.mUrl);
         }
     }

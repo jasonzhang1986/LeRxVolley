@@ -45,4 +45,5 @@ public class RequestConfig {
     public Object mTag; //每个request可以设置一个标志
 
     public boolean mUseStetho; //是否使用Facebook的stetho
+    public boolean mUseOkHttpStack;
 }

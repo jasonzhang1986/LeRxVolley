@@ -24,10 +24,13 @@ import com.kymjs.rxvolley.client.JsonRequest;
 import com.kymjs.rxvolley.client.ProgressListener;
 import com.kymjs.rxvolley.client.RequestConfig;
 import com.kymjs.rxvolley.http.DefaultRetryPolicy;
+import com.kymjs.rxvolley.http.HttpConnectStack;
+import com.kymjs.rxvolley.http.OkHttp3Stack;
 import com.kymjs.rxvolley.http.Request;
 import com.kymjs.rxvolley.http.RequestQueue;
 import com.kymjs.rxvolley.http.RetryPolicy;
 import com.kymjs.rxvolley.interf.ICache;
+import com.kymjs.rxvolley.interf.IHttpStack;
 import com.kymjs.rxvolley.toolbox.FileUtils;
 import com.kymjs.rxvolley.toolbox.Loger;
 
@@ -52,8 +55,17 @@ public class RxVolley {
      * 获取一个请求队列(单例)
      */
     public synchronized static RequestQueue getRequestQueue(Context context) {
+        return getRequestQueue(context, false);
+    }
+    public synchronized static RequestQueue getRequestQueue(Context context, boolean useOkHttpStack) {
         if (sRequestQueue == null) {
-            sRequestQueue = RequestQueue.newRequestQueue(FileUtils.getSaveFolder(context,"RxVolley"));
+            IHttpStack httpStack = null;
+            if (useOkHttpStack) {
+                httpStack = new OkHttp3Stack();
+            } else {
+                httpStack = new HttpConnectStack();
+            }
+            sRequestQueue = RequestQueue.newRequestQueue(FileUtils.getSaveFolder(context,"RxVolley"), httpStack);
         }
         return sRequestQueue;
     }
@@ -170,6 +182,10 @@ public class RxVolley {
 
         public Builder stetho(boolean useStetho) {
             this.httpConfig.mUseStetho = useStetho;
+            return this;
+        }
+        public Builder httpStack(boolean useOkHttp) {
+            this.httpConfig.mUseOkHttpStack = useOkHttp;
             return this;
         }
 
