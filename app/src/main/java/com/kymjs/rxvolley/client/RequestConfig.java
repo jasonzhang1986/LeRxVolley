@@ -43,7 +43,4 @@ public class RequestConfig {
     public String mEncoding = "UTF-8"; //编码
 
     public Object mTag; //每个request可以设置一个标志
-
-    public boolean mUseStetho; //是否使用Facebook的stetho
-    public boolean mUseOkHttpStack;
 }

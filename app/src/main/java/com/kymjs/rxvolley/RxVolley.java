@@ -55,16 +55,13 @@ public class RxVolley {
      * 获取一个请求队列(单例)
      */
     public synchronized static RequestQueue getRequestQueue(Context context) {
-        return getRequestQueue(context, false);
-    }
-    public synchronized static RequestQueue getRequestQueue(Context context, boolean useOkHttpStack) {
         if (sRequestQueue == null) {
-            IHttpStack httpStack = null;
-            if (useOkHttpStack) {
-                httpStack = new OkHttp3Stack();
-            } else {
-                httpStack = new HttpConnectStack();
-            }
+            throw new IllegalStateException("RequestQueue must be init before!");
+        }
+        return sRequestQueue;
+    }
+    public synchronized static RequestQueue getRequestQueue(Context context, IHttpStack httpStack) {
+        if (sRequestQueue == null) {
             sRequestQueue = RequestQueue.newRequestQueue(FileUtils.getSaveFolder(context,"RxVolley"), httpStack);
         }
         return sRequestQueue;
@@ -177,15 +174,6 @@ public class RxVolley {
          */
         public Builder timeout(int timeout) {
             this.httpConfig.mTimeout = timeout;
-            return this;
-        }
-
-        public Builder stetho(boolean useStetho) {
-            this.httpConfig.mUseStetho = useStetho;
-            return this;
-        }
-        public Builder httpStack(boolean useOkHttp) {
-            this.httpConfig.mUseOkHttpStack = useOkHttp;
             return this;
         }
 

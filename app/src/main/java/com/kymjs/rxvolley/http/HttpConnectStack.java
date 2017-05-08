@@ -24,6 +24,7 @@ import com.kymjs.rxvolley.RxVolley;
 import com.kymjs.rxvolley.interf.IHttpStack;
 import com.kymjs.rxvolley.toolbox.HTTPSTrustManager;
 import com.kymjs.rxvolley.toolbox.HttpParamsEntry;
+import com.kymjs.rxvolley.toolbox.SPUtils;
 import com.letv.net.NetManager;
 
 import java.io.ByteArrayInputStream;
@@ -94,8 +95,12 @@ public class HttpConnectStack implements IHttpStack {
             url = rewritten;
         }
         URL parsedUrl = new URL(url);
-        HttpURLConnection connection = configureAndConnectRequest(parsedUrl, request, header);
-        return responseFromConnection(connection, request.getStethoURLConnectionManager());
+        StethoURLConnectionManager stethoURLConnectionManager = null;
+        if (SPUtils.getBoolean(SPUtils.KEY_STETHO)) {
+            stethoURLConnectionManager = new StethoURLConnectionManager(url);
+        }
+        HttpURLConnection connection = configureAndConnectRequest(parsedUrl, request, header, stethoURLConnectionManager);
+        return responseFromConnection(connection, stethoURLConnectionManager);
     }
 
     private URLHttpResponse responseFromConnection(HttpURLConnection connection, StethoURLConnectionManager stethoURLConnectionManager)
@@ -157,11 +162,11 @@ public class HttpConnectStack implements IHttpStack {
         return response;
     }
 
-    private HttpURLConnection configureAndConnectRequest(URL url, Request<?> request, List<HttpParamsEntry> header)
+    private HttpURLConnection configureAndConnectRequest(URL url, Request<?> request, List<HttpParamsEntry> header, StethoURLConnectionManager stethoURLConnectionManager)
             throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         int timeoutMs = request.getTimeoutMs();
-        StethoURLConnectionManager stethoURLConnectionManager = request.getStethoURLConnectionManager();
+
         try {
             connection.setConnectTimeout(timeoutMs);
             connection.setReadTimeout(timeoutMs);

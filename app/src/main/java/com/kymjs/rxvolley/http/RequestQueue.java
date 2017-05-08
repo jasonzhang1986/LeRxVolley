@@ -319,15 +319,7 @@ public class RequestQueue {
     public synchronized static RequestQueue newRequestQueue(File cacheFolder) {
         return newRequestQueue(cacheFolder, new HttpConnectStack());
     }
-    public synchronized static RequestQueue newRequestQueue(File cacheFolder, boolean useOkHttpStack) {
-        IHttpStack httpStack = null;
-        if (useOkHttpStack) {
-            httpStack = new OkHttp3Stack();
-        } else {
-            httpStack = new HttpConnectStack();
-        }
-        return newRequestQueue(cacheFolder, httpStack);
-    }
+
     public synchronized static RequestQueue newRequestQueue(File cacheFolder, IHttpStack
             httpStack) {
         if (cacheFolder == null || !cacheFolder.exists() || !cacheFolder.isDirectory()) {

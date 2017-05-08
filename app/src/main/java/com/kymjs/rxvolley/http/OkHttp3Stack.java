@@ -7,20 +7,14 @@ package com.kymjs.rxvolley.http;
  * Desc  :
  */
 
-import com.facebook.stetho.Stetho;
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.kymjs.rxvolley.RxVolley;
 import com.kymjs.rxvolley.interf.IHttpStack;
 import com.kymjs.rxvolley.toolbox.HttpParamsEntry;
 import com.kymjs.rxvolley.toolbox.Loger;
+import com.kymjs.rxvolley.toolbox.SPUtils;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
-import org.apache.http.entity.BasicHttpEntity;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicHttpResponse;
-import org.apache.http.message.BasicStatusLine;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,20 +33,6 @@ import okhttp3.ResponseBody;
 public class OkHttp3Stack implements IHttpStack {
 
     public OkHttp3Stack() {
-    }
-
-    private static HttpEntity entityFromOkHttpResponse(Response r) throws IOException {
-        BasicHttpEntity entity = new BasicHttpEntity();
-        ResponseBody body = r.body();
-
-        entity.setContent(body.byteStream());
-        entity.setContentLength(body.contentLength());
-        entity.setContentEncoding(r.header("Content-Encoding"));
-
-        if (body.contentType() != null) {
-            entity.setContentType(body.contentType().type());
-        }
-        return entity;
     }
 
     @SuppressWarnings("deprecation")
@@ -123,7 +103,7 @@ public class OkHttp3Stack implements IHttpStack {
                     clientBuilder.connectTimeout(timeoutMs, TimeUnit.MILLISECONDS);
                     clientBuilder.readTimeout(timeoutMs, TimeUnit.MILLISECONDS);
                     clientBuilder.writeTimeout(timeoutMs, TimeUnit.MILLISECONDS);
-                    if (request.getConfig().mUseStetho) {
+                    if (SPUtils.getBoolean(SPUtils.KEY_STETHO)) {
                         clientBuilder.addNetworkInterceptor(new StethoInterceptor());
                     }
                     client = clientBuilder.build();

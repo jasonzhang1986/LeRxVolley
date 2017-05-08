@@ -18,7 +18,6 @@ package com.kymjs.rxvolley.http;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.text.TextUtils;
-import com.facebook.stetho.urlconnection.StethoURLConnectionManager;
 import com.kymjs.rxvolley.client.HttpCallback;
 import com.kymjs.rxvolley.client.ProgressListener;
 import com.kymjs.rxvolley.client.RequestConfig;
@@ -52,7 +51,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
     protected ProgressListener mProgressListener;
     protected RequestQueue mRequestQueue;
     private ICache.Entry mCacheEntry = null;
-    private StethoURLConnectionManager mStethoURLConnectionManager;
 
     public Request(RequestConfig config, HttpCallback callback) {
         if (config == null) {
@@ -61,12 +59,6 @@ public abstract class Request<T> implements Comparable<Request<T>> {
         mConfig = config;
         mCallback = callback;
         mDefaultTrafficStatsTag = findDefaultTrafficStatsTag(config.mUrl);
-        if (mConfig.mUseStetho && !mConfig.mUseOkHttpStack) {
-            mStethoURLConnectionManager = new StethoURLConnectionManager(config.mUrl);
-        }
-    }
-    StethoURLConnectionManager getStethoURLConnectionManager() {
-        return mStethoURLConnectionManager;
     }
     /**
      * Set listener for tracking download progress

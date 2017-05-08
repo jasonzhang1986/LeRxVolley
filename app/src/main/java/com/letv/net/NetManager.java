@@ -15,77 +15,106 @@ import com.kymjs.rxvolley.client.FileRequest;
 import com.kymjs.rxvolley.client.HttpParams;
 import com.kymjs.rxvolley.client.RequestConfig;
 import com.kymjs.rxvolley.http.DefaultRetryPolicy;
+import com.kymjs.rxvolley.http.HttpConnectStack;
+import com.kymjs.rxvolley.http.OkHttp3Stack;
 import com.kymjs.rxvolley.http.RequestQueue;
+import com.kymjs.rxvolley.interf.IHttpStack;
 import com.kymjs.rxvolley.toolbox.Loger;
+import com.kymjs.rxvolley.toolbox.SPUtils;
 
 /**
  * Created by jczhang on 2016/3/13.
  */
 public class NetManager<T> {
 	@SuppressWarnings("rawtypes")
-	private static volatile NetManager mNetManager;
+	private static volatile NetManager sInstance;
 	private final static int TIME_OUT = 10 * 1000;
-	private boolean mUseStetho = false;
-	private boolean mUseOkHttpStack = false;
 	private NetManager() {
 	}
 	private NetManager(Context context) {
+		SPUtils.init(context);
 		setDataCache(context,null);
 	}
 
 	public void setDataCache(Context context,String cache) {
+		initRequestQueue(context, cache);
+	}
+	private void initRequestQueue(Context context, String cachePath) {
 		RequestQueue requestQueue = null;
-		if (TextUtils.isEmpty(cache)) {
-			requestQueue = RxVolley.getRequestQueue(context, mUseOkHttpStack);
+		//初始化HttpStack
+		IHttpStack httpStack = null;
+		if (SPUtils.getBoolean(SPUtils.KEY_OKHTTP)) {
+			httpStack = new OkHttp3Stack();
 		} else {
-			requestQueue = RequestQueue.newRequestQueue(new File(cache), mUseOkHttpStack);
+			httpStack = new HttpConnectStack();
+		}
+
+		if (TextUtils.isEmpty(cachePath)) {
+			requestQueue = RxVolley.getRequestQueue(context, httpStack);
+		} else {
+			requestQueue = RequestQueue.newRequestQueue(new File(cachePath), httpStack);
 		}
 		RxVolley.setRequestQueue(requestQueue);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static <T> NetManager<T> getInstance(Context context) {
-		if(mNetManager==null){
+		if(sInstance ==null){
 			synchronized (NetManager.class) {
-				if (mNetManager==null) {
-					mNetManager = new NetManager(context);
+				if (sInstance ==null) {
+					sInstance = new NetManager(context);
 				}
 			}
 		}
-		return mNetManager;
+		return sInstance;
+	}
+	public static NetManager get() {
+		if(sInstance ==null) {
+			throw new IllegalStateException("initHttp must call before get");
+		}
+		return sInstance;
 	}
 
-	private boolean stethoInited = false;
+	private boolean inited = false;
+
+	/**
+	 * 在Application中调用，初始化参数
+	 * @param applicationContext  context
+	 * @param stetho 是否使用Facebook的stetho库来查看网络请求细节
+	 * @param okHttpStack 是否使用OkHttp
+	 */
 	public static void initHttp(Context applicationContext, boolean stetho, boolean okHttpStack) {
-		if (mNetManager == null) {
+		if (sInstance == null) {
 			synchronized (NetManager.class) {
-				if (mNetManager==null) {
-					mNetManager = new NetManager();
+				if (sInstance ==null) {
+					sInstance = new NetManager();
 				}
 			}
 		}
-		mNetManager.mUseStetho = stetho;
-		mNetManager.mUseOkHttpStack = okHttpStack;
-		mNetManager.setDataCache(applicationContext,null);
-		if (mNetManager.mUseOkHttpStack) {
+		if (sInstance.inited) {
 			return;
 		}
-		synchronized (NetManager.class) {
-			if (!mNetManager.stethoInited) {
-				mNetManager.stethoInited = true;
-				Stetho.initializeWithDefaults(applicationContext);
-			}
+		SPUtils.init(applicationContext);
+		SPUtils.putBoolean(SPUtils.KEY_STETHO, stetho);
+		SPUtils.putBoolean(SPUtils.KEY_OKHTTP, okHttpStack);
+		sInstance.initRequestQueue(applicationContext,null);
+		if (stetho) {
+			Stetho.initializeWithDefaults(applicationContext);
 		}
 	}
 
 
 	public void doGet(Context context,String url, Map<String, String> headParams, RequestHttpCallback<T> callback, boolean shouldCache) {
-		getDefaultBuilder().url(url).httpMethod(RxVolley.Method.GET).shouldCache(shouldCache).params(getParams(headParams,true))
-				.callback(callback).doTask(context);
+		getDefaultBuilder()
+				.url(url)
+				.httpMethod(RxVolley.Method.GET)
+				.shouldCache(shouldCache)
+				.params(getParams(headParams,true))
+				.callback(callback)
+				.doTask(context);
 	}
 	public void doGet(Context context,String url, Map<String, String> headParams, RequestHttpCallback<T> callback) {
-		getDefaultBuilder().url(url).httpMethod(RxVolley.Method.GET).shouldCache(false).params(getParams(headParams,true))
-				.callback(callback).doTask(context);
+		doGet(context, url, headParams, callback, false);
 	}
 
 	public void doPost(Context context,String url, Map<String, String> headParams, Map<String, String> bodyParams,
@@ -130,11 +159,11 @@ public class NetManager<T> {
 	}
 
 	public void doRequest(Context context,ObjectRequest<T> request) {
-		new RxVolley.Builder().stetho(mUseStetho).httpStack(true).setRequest(request).doTask(context);
+		new RxVolley.Builder().setRequest(request).doTask(context);
 	}
 
 	private RxVolley.Builder getDefaultBuilder() {
-		return new RxVolley.Builder().timeout(TIME_OUT).httpStack(true).stetho(mUseStetho).encoding("utf-8");
+		return new RxVolley.Builder().timeout(TIME_OUT).encoding("utf-8");
 	}
 
 	private HttpParams getParams(HttpParams httpParams, Map<String, String> parms,boolean isHead) {
