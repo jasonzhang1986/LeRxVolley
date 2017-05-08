@@ -172,7 +172,9 @@ public class HttpConnectStack implements IHttpStack {
             connection.setReadTimeout(timeoutMs);
             connection.setUseCaches(false);
             connection.setDoInput(true);
-
+            for (HttpParamsEntry entry : header) {
+                connection.addRequestProperty(entry.k, entry.v);
+            }
             setConnectionParametersForRequest(connection,request);
 
             // use caller-provided custom SslSocketFactory, if any, for HTTPS
@@ -187,25 +189,19 @@ public class HttpConnectStack implements IHttpStack {
             }
             try {
                 if (stethoURLConnectionManager!=null) {
-                    // Adding this disables transparent gzip compression so that we can intercept
-                    // the raw stream and display the correct response body size.
-                    connection.setRequestProperty(HEADER_ACCEPT_ENCODING, GZIP_ENCODING);
                     SimpleRequestEntity requestEntity = null;
                     if (request.getBody() != null) {
                         requestEntity = new ByteArrayRequestEntity(request.getBody());
                     }
                     stethoURLConnectionManager.preConnect(connection, requestEntity);
-                    if (request.getMethod() == RxVolley.Method.POST) {
-                        if (requestEntity == null) {
-                            throw new IllegalStateException("POST requires an entity");
-                        }
-                        requestEntity.writeTo(connection.getOutputStream());
-                    }
+//                    if (request.getMethod() == RxVolley.Method.POST) {
+//                        if (requestEntity == null) {
+//                            throw new IllegalStateException("POST requires an entity");
+//                        }
+//                        requestEntity.writeTo(connection.getOutputStream());
+//                    }
                 }
 
-                for (HttpParamsEntry entry : header) {
-                    connection.addRequestProperty(entry.k, entry.v);
-                }
                 // Ensure that we are connected after this point.  Note that getOutputStream above will
                 // also connect and exchange HTTP messages.
                 connection.connect();
@@ -273,6 +269,11 @@ public class HttpConnectStack implements IHttpStack {
             connection.setDoOutput(true);
             connection.addRequestProperty(HEADER_CONTENT_TYPE,
                     request.getBodyContentType());
+            // Adding this disables transparent gzip compression so that we can intercept
+            // the raw stream and display the correct response body size.
+            if (SPUtils.getBoolean(SPUtils.KEY_STETHO)) {
+                connection.setRequestProperty(HEADER_ACCEPT_ENCODING, GZIP_ENCODING);
+            }
             DataOutputStream out = new DataOutputStream(
                     connection.getOutputStream());
             out.write(body);
